@@ -37,8 +37,8 @@
                                 <span id="minutes">00</span>
                                 <span class="font-medium text-gray-600 uppercase text-xs">Minutos</span>
                             </div>
-                            <span>:</span>
-                            <div class="flex flex-col items-center">
+                            <span class="hidden md:inline">:</span> 
+                            <div class="hidden md:flex flex-col items-center">
                                 <span id="seconds">00</span>
                                 <span class="font-medium text-gray-600 uppercase text-xs">Segs</span>
                             </div>
@@ -75,16 +75,14 @@
                     <form action="{% url 'payments:generate-order' %}" method="GET" class="space-y-4">
                         <input type="hidden" name="raffle_id" value="{{ raffle.id }}">
 
-                        <div>
-                            <label for="tickets_quantity" class="block text-gray-700 text-sm font-bold mb-2">
-                                Cantidad de Tickets:
-                            </label>
-                            <div class="flex items-center border border-gray-300 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
-                                <input type="number" id="tickets_quantity" name="tickets_quantity" 
-                                       class="grow p-3 text-gray-800 focus:outline-none" 
-                                       value="1" min="1" required>
-                                <span class="bg-gray-100 text-gray-600 px-4 py-3 border-l border-gray-300 font-medium whitespace-nowrap">S/ 1.50 c/u</span>
-                            </div>
+                        <div class="flex items-center border border-gray-300 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                            <input type="number" id="tickets_quantity" name="tickets_quantity" 
+                                   class="grow p-3 text-gray-800 focus:outline-none min-w-0" 
+                                   value="1" min="1" required>
+                            
+                            <span class="bg-gray-100 text-gray-600 px-2 md:px-4 py-3 border-l border-gray-300 font-medium whitespace-nowrap text-xs md:text-sm">
+                                S/ 1.50 c/u
+                            </span>
                         </div>
                         
                         {% if not user.is_authenticated %}
