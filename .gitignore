@@ -4,7 +4,11 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
+# Ignorar todos los dist
 dist/
+
+# Permitir que Git entre en la ruta específica
+!theme/static/css/dist/
 !theme/static/css/dist/styles.css
 build/
 env/
