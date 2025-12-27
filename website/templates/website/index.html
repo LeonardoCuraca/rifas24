@@ -1,0 +1,119 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<main class="container mx-auto py-10 px-4">
+    <section class="mb-16">
+        <div class="flex items-center space-x-3 mb-8">
+            <div class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </div>
+            <h2 class="text-3xl font-extrabold text-primary tracking-tight">RIFAS ACTIVAS</h2>
+        </div>
+
+        {% if live_raffles %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for raffle in live_raffles %}
+                    <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden">
+                        <div class="p-6 grow">
+                            <div class="flex items-center text-secondary font-semibold text-xs mb-3 uppercase tracking-wider">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Finaliza: {{ raffle.end_date|date:"d M" }}, 20:00</span>
+                            </div>
+                            
+                            <h3 class="text-2xl font-bold text-primary mb-2 group-hover:text-secondary transition-colors">{{ raffle.name }}</h3>
+                            <div class="flex items-baseline mb-4">
+                                <span class="text-sm font-bold text-gray-500 mr-1">S/</span>
+                                <span class="text-4xl font-black text-primary">{{ raffle.base_amount|floatformat:2 }}</span>
+                            </div>
+                            <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 italic">"{{ raffle.description }}"</p>
+                        </div>
+                        
+                        <div class="p-6 pt-0">
+                            <a href="{% url 'website:raffle-detail' raffle.id %}" class="block w-full bg-primary text-white text-center py-4 rounded-xl font-bold hover:bg-opacity-90 transform group-hover:-translate-y-1 transition-all shadow-lg shadow-primary/20">
+                                PARTICIPAR AHORA
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-50 rounded-2xl p-12 text-center border-2 border-dashed border-gray-200">
+                <p class="text-gray-500 font-medium">No hay rifas activas en este momento. ¡Vuelve pronto!</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="mb-16">
+        <h2 class="text-2xl font-bold text-gray-400 mb-8 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            PRÓXIMAMENTE
+        </h2>
+
+        {% if upcoming_raffles %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for raffle in upcoming_raffles %}
+                    <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 opacity-80">
+                        <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-700 text-[10px] font-bold mb-3">PRÓXIMAMENTE</span>
+                        <h3 class="text-lg font-bold text-gray-700 mb-1">{{ raffle.name }}</h3>
+                        <p class="text-gray-500 text-sm mb-4">Inicia: {{ raffle.start_date|date:"d \d\e M" }}</p>
+                        <a href="{% url 'website:raffle-detail' raffle.id %}" class="text-primary font-bold text-sm hover:underline flex items-center">
+                            Ver preventa
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-400 italic">No hay próximas rifas programadas.</p>
+        {% endif %}
+    </section>
+
+    <section class="bg-primary/5 -mx-4 px-4 py-16 rounded-3xl">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold text-primary mb-10 text-center uppercase tracking-widest">🏆 Últimos Ganadores</h2>
+            
+            {% if past_winners %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for raffle in past_winners %}
+                        <div class="bg-linear-to-br from-amber-50 to-yellow-100 rounded-2xl shadow-md p-6 border-2 border-amber-400 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div class="absolute -right-6 -top-6 text-yellow-300 opacity-40 transform rotate-12 group-hover:scale-110 transition-transform">
+                                <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            
+                            <div class="relative z-10 flex flex-col h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 rounded-full bg-amber-400 flex items-center justify-center text-white shadow-sm mr-4">
+                                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-amber-900 leading-tight">{{ raffle.name }}</h3>
+                                        <p class="text-sm text-amber-700 font-medium">Ganador(a)</p>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-2xl font-black text-amber-950 mb-6">{{ raffle.winner.get_full_name|default:raffle.winner.username }}</p>
+                                
+                                <div class="mt-auto flex justify-between items-center pt-4 border-t border-amber-200">
+                                    <span class="text-sm font-medium text-amber-800">{{ raffle.end_date|date:"d M, Y" }}</span>
+                                    <a href="{% url 'website:raffle-detail' raffle.id %}" class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white text-sm font-bold rounded-md hover:bg-amber-600 transition-colors shadow-sm">
+                                        Ver detalles
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center font-medium italic">Aún no hay ganadores para mostrar.</p>
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+{% endblock %}

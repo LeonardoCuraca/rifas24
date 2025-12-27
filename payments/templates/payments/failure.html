@@ -1,0 +1,41 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="container mx-auto py-20 px-4 flex justify-center">
+    <div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+        
+        <div class="bg-linear-to-b from-red-50 to-white p-10 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-black text-primary mb-2 tracking-tight uppercase">Pago Rechazado</h1>
+            <p class="text-gray-500 font-medium">Lo sentimos, no pudimos procesar tu transacción.</p>
+        </div>
+
+        <div class="px-10 pb-10">
+            {% if order %}
+            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8 text-center">
+                <p class="text-sm text-gray-500 mb-1">Intento de compra para:</p>
+                <p class="font-bold text-primary text-lg">{{ order.raffle.name }}</p>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="{% url 'website:index' %}" class="flex items-center justify-center px-6 py-4 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                    </svg>
+                    Regresar al Inicio
+                </a>
+
+                <a href="{% if order %}{% url 'website:raffle-detail' order.raffle.id %}{% else %}{% url 'website:index' %}{% endif %}" class="flex items-center justify-center px-6 py-4 bg-primary text-white font-bold rounded-xl hover:bg-opacity-90 shadow-lg shadow-primary/30 transform hover:-translate-y-1 transition-all">
+                    Volver a Intentarlo
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

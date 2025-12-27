@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"> -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+	
+	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css">
+	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-duotone-solid.css">
+	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-thin.css">
+	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-solid.css">
+	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-regular.css">
+	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-light.css">
+
+	{% block head %}{% endblock %}
+
+	<link href="{% static 'css/animate.css' %}" rel="stylesheet">
+	<link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+	<style>
+		.disabled {
+			pointer-events: none;
+  		cursor: default;
+		}
+
+		a { text-decoration: none!important; }
+	</style>
+
+</head>
+
+<body class="fixed-sidebar md-skin pace-done fixed-nav fixed-nav-basic ">
+	<div id="wrapper">
+		<nav class="navbar-default navbar-static-side" role="navigation">
+			<div class="sidebar-collapse">
+				<ul class="nav metismenu" id="side-menu">
+					<li class="nav-header">
+						<div class="profile-element">
+							<a href="" class="d-block mb-3">
+								<img alt="image" class="img-fluid" src="{% static 'img/logo.png' %}" />
+							</a>
+							<div class="dropdown">
+								<a data-toggle="dropdown" class="dropdown-toggle" href="#">
+									<span class="block m-t-xs font-bold">{{ user.get_full_name }}</span>
+									<span class="text-muted text-xs block">
+										{% for branch in user.get_branches %}
+										{% if branch.id == request.session.branch %}
+										{{ branch.name }}
+										{% endif %}
+										{% endfor %}
+										<b class="caret"></b>
+									</span>
+								</a>
+								<ul class="dropdown-menu animated fadeInRight mt-5">
+									{% for branch in user.get_branches %}
+										<li><a href="{% url 'panel:set-branch' branch.id %}?next={{ request.path }}">{{ branch.name }}</a></li>
+									{% endfor %}
+								</ul>
+							</div>
+						</div>
+					</li>
+					<li>
+						<a href="{% url 'panel:index' %}"><i class="fa fa-solid fa-house-chimney"></i> <span class="nav-label">Inicio</span></a>
+					</li>
+
+					<li class="{% if request.resolver_match.app_name == 'entities' %}active{% endif %}">
+						<a href="{% url 'entities:index' %}">
+							<i class="fa fa-users"></i>
+							<span class="nav-label">Entidades</span>
+							<span class="fa arrow"></span>
+						</a>
+						<ul class="nav nav-second-level" aria-expanded="true">
+							<li>
+								<a href="{% url 'entities:user-list' %}">
+									<i class="fa fa-building fa-fw"></i>
+									<span class="nav-label">Usuarios</span>
+								</a>
+							</li>
+
+							<li>
+								<a href="{% url 'entities:raffle-list' %}">
+									<i class="fa fa-user fa-fw"></i>
+									<span class="nav-label">Rifas</span>
+								</a>
+							</li>
+
+							<li>
+								<a href="{% url 'entities:ticket-list' %}">
+									<i class="fa fa-handshake fa-fw"></i>
+									<span class="nav-label">Tickets</span>
+								</a>
+							</li>
+						</ul>
+					</li>
+
+					<li>
+						<a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> <span class="nav-label">Cerrar sesión</span></a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+		<div id="page-wrapper" class="gray-bg">
+			<div class="row border-bottom">
+				<nav class="navbar navbar-fixed-top white-bg" role="navigation" style="margin-bottom: 0">
+					<div class="navbar-header">
+						<a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+					</div>
+					<ul class="nav navbar-top-links navbar-right">
+						<li class="me-2">
+							<span class="m-r-sm text-muted welcome-message">Bienvenido(a) a {{ project_name }}</span>
+						</li>
+						<li>
+							<a href="{% url 'logout' %}">
+								<i class="fa fa-sign-out"></i> Cerrar sesión
+							</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+
+			{% if model %}
+			<div class="row wrapper border-bottom white-bg page-heading">
+				<div class="col-sm-4">
+						<h2>{{ view.title }}</h2>
+						<ol class="breadcrumb">
+								<li class="breadcrumb-item">
+										<a href="{% url 'panel:index' %}">Panel</a>
+								</li>
+								<li class="breadcrumb-item">
+									<a href="{{ app_url }}">{{ app }}</a>
+								</li>
+								<li class="breadcrumb-item active">
+										<strong>{{ model.verbose_name_plural }}</strong>
+								</li>
+						</ol>
+				</div>
+				<div class="col-sm-8">
+						<div class="title-action">
+								<a href="{% url 'panel:index' %}" class="btn btn-danger"><i class="fa-solid fa-rotate-left"></i> Volver al Panel</a>
+								
+								{% for button in buttons %}
+								<a href="{{ button.url }}" class="btn btn-primary ms-2">{{ button.text }}</a>
+								{% endfor %}
+								
+								{% if model_create_url %}
+								<a href="{{ model_create_url }}" class="btn btn-primary ms-2">Crear {{ model.verbose_name }}</a>
+								{% endif %}
+
+								{% if 'list' in view.actions %}
+								<a href="{{ object.get_list_url }}" class="btn btn-primary ms-2">Volver al listado</a>
+								{% endif %}
+
+								{% if 'export' in view.actions %}
+								<form method="post" class="d-inline">
+										{% csrf_token %}
+										<input type="hidden" name="action" value="export">
+										<button type="submit" data-action="export" class="btn btn-primary ms-2">Exportar a Excel</button>
+								</form>
+								{% endif %}
+						</div>
+				</div>
+			</div>
+			{% endif %}
+
+			{% if messages %}
+			<div class="wrapper wrapper-content animated fadeInRight py-0">
+				<div class="row">
+					<div class="col-8">
+						{% for message in messages %}
+						<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade mt-4 mb-0 show">
+							{{ message }}
+							<button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+
+			{% block content %}{% endblock %}
+
+		</div>
+	</div>
+
+	<!-- Mainly scripts -->
+	<!-- jquery -->
+	<script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+	<script src="{% static 'js/popper.min.js' %}"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script> -->
+	<script src="{% static 'js/bootstrap.js' %}"></script>
+
+	<script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+	<script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+	<!-- Custom and plugin javascript -->
+	<script src="{% static 'js/inspinia.js' %}"></script>
+	<script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>
+
+	{% block script %}{% endblock %}
+
+	<script>
+		$('button[type="submit"]').on('click', function() {
+			// if data-action="export"
+			if ($(this).data('action') === 'export') return
+			$(this).addClass('disabled');
+		})
+	</script>
+
+</body>
+
+</html>

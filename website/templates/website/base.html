@@ -1,0 +1,131 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+    <title>Rifas 24</title>
+    {% tailwind_css %}
+
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<style>
+    .logo-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 50;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none; /* allow interaction below */
+      animation: logo-fade .8s ease-in 0s forwards;
+    }
+    @keyframes logo-fade {
+      0% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; } /* Add visibility: hidden to hide completely */
+    }
+    .logo-img {
+      max-width: min(60vw, 380px);
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      user-select: none;
+    }
+</style>
+
+<div class="logo-overlay">
+    <img src="{% static 'img/logo.png' %}" alt="logo" class="logo-img" />
+</div>
+  
+<body class="flex flex-col min-h-screen bg-gray-100">
+
+    <header class="bg-white shadow-md p-4 relative">
+        <nav class="container mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-2">
+                <img src="{% static 'img/logo.png' %}" alt="Rifas 24 Logo" class="h-8">
+                <span class="text-xl font-bold text-primary">DAILY <span class="text-secondary">RAFFLES</span></span>
+            </a>
+    
+            <div class="hidden md:flex space-x-6">
+                <a href="/" class="hover:text-secondary transition-colors duration-200">Todas las Rifas</a>
+                <a href="/" class="hover:text-secondary transition-colors duration-200">En Vivo</a>
+                <a href="/" class="hover:text-secondary transition-colors duration-200">Ganadores</a>
+            </div>
+    
+            <div class="flex items-center space-x-4">
+                {% if user.is_authenticated %}
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false" class="flex items-center focus:outline-none">
+                            <div class="h-9 w-9 bg-primary text-white rounded-full flex items-center justify-center font-bold border-2 border-white shadow-sm transition-colors cursor-pointer">
+                                {{ user.first_name|first|upper|default:user.username|first|upper }}
+                            </div>
+                        </button>
+    
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-xl z-50 py-2">
+                            
+                            <div class="px-4 py-2 border-b border-gray-50">
+                                <p class="text-xs text-gray-500">Hola,</p>
+                                <p class="text-sm font-semibold text-gray-800 truncate">{{ user.get_full_name|default:user.username }}</p>
+                            </div>
+    
+                            <a href="{% url 'website:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-secondary">Mi Perfil</a>
+                            <a href="{% url 'website:my_purchases' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-secondary">Mis Compras</a>
+                            
+                            <hr class="my-1 border-gray-100">
+                            
+                            <form method="post" action="{% url 'logout' %}" class="block w-full text-left">
+                                {% csrf_token %}
+                                <button type="submit" class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium text-left cursor-pointer">
+                                    Cerrar Sesión
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="hidden md:flex items-center space-x-3">
+                        <a href="{% url 'login' %}" class="text-sm font-medium text-gray-600 hover:text-primary">Iniciar Sesión</a>
+                        <a href="{% url 'website:register' %}" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-secondary transition-colors">
+                            Registrarse
+                        </a>
+                    </div>
+                {% endif %}
+    
+                <button class="md:hidden text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="grow container mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-primary text-white p-6 mt-8">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-sm">
+            <div class="mb-4 md:mb-0">
+                <p>&copy; {% now "Y" %} DAILY <span class="text-secondary">RAFFLES</span>. All rights reserved.</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-secondary transition-colors duration-200">About Us</a>
+                <a href="#" class="hover:text-secondary transition-colors duration-200">Contact</a>
+                <a href="#" class="hover:text-secondary transition-colors duration-200">Terms</a>
+                <a href="#" class="hover:text-secondary transition-colors duration-200">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

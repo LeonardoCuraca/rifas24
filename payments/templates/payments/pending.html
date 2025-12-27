@@ -1,0 +1,40 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="container mx-auto py-20 px-4 flex justify-center">
+    <div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+        
+        <div class="bg-linear-to-b from-amber-50 to-white p-10 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-6">
+                <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-black text-primary mb-2 tracking-tight uppercase">Pago Pendiente</h1>
+            <p class="text-gray-500 font-medium">Estamos procesando tu transacción.</p>
+        </div>
+
+        <div class="px-10 pb-10">
+            <div class="bg-amber-50/50 rounded-2xl p-6 border border-amber-100 mb-8 text-center">
+                <p class="text-amber-800 text-sm leading-relaxed italic">
+                    "Si utilizaste un medio de pago en efectivo o transferencia, la confirmación puede tardar unas horas. Te enviaremos un correo apenas tus tickets estén listos."
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="{% url 'website:index' %}" class="flex items-center justify-center px-6 py-4 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                    </svg>
+                    Regresar al Inicio
+                </a>
+
+                <a href="{% url 'website:index' %}" class="flex items-center justify-center px-6 py-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 shadow-lg shadow-amber-200 transform hover:-translate-y-1 transition-all text-center">
+                    Entendido
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

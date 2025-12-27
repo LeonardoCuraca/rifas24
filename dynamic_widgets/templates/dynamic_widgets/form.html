@@ -1,0 +1,203 @@
+{% extends 'panel/base.html' %}
+
+{% load static %}
+{% load dynamic_forms %}
+
+{% block head %}
+<link href="{% static 'css/plugins/chosen/bootstrap-chosen.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/datapicker/datepicker3.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/clockpicker/clockpicker.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+
+<style>
+	.row.reverse {
+		flex-direction: row-reverse;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+	<form method="post" enctype="multipart/form-data">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="ibox">
+					<div class="ibox-content">
+						{{form.errors}}
+							{% csrf_token %}
+							{{ form.media }}
+							{{ form|dynamic_form:request|safe }}
+							<button type="submit" class="btn btn-primary">Guardar</button>
+							{% if view.add_another %}
+							<button type="submit" class="btn btn-primary" name="_addanother">Guardar y añadir otro</button>
+							{% endif %}
+					</div>
+				</div>
+			</div>
+			{% if formset %}
+			<div class="col-lg-6">
+				<div id="form-container">
+					<div class="ibox">
+						<div class="ibox-title">
+							<h5 class="m-0">{{ formset_model.verbose_name_plural|title }}</h5>
+						</div>
+					</div>
+					{{ formset.management_form }}
+					{% for form in formset %}
+					<div class="ibox inline-form">
+						<div class="ibox-content">
+							{% if not object %}
+							<div class="tooltip-demo">
+								<button onclick="removeForm(event)" type="button" class="btn btn-danger btn-sm">
+									<i class="fa fa-trash"></i>
+								</button>
+							</div>
+							<br>
+							{% endif %}
+							{{ form|dynamic_form:request|safe }}
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+				<button id="add-form" type="button" class="btn btn-success">Agregar</button>
+			</div>
+			{% endif %}
+			{% if view.extra_template %}
+			<div class="col-lg-6">
+				{% include view.extra_template %}
+			</div>
+			{% endif %}
+		</div>
+	</form>
+</div>
+
+{{ form|dynamic_modals:request|safe }}
+{% for form in formset %}
+{{ form|dynamic_modals:request|safe }}
+{% endfor %}
+
+{% endblock %}
+
+{% block script %}
+
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+
+<!-- Smart Selects Libary -->
+<script src="{% static 'smart-selects/admin/js/chainedfk.js' %}"></script>
+<script src="{% static 'smart-selects/admin/js/bindfields.js' %}"></script>
+
+
+<!-- Date picker -->
+<script src="{% static 'js/plugins/datapicker/bootstrap-datepicker.js' %}"></script>
+
+<!-- Color picker -->
+<script src="{% static 'js/plugins/colorpicker/bootstrap-colorpicker.min.js' %}"></script>
+
+<!-- Clock picker -->
+<script src="{% static 'js/plugins/clockpicker/clockpicker.js' %}"></script>
+
+<!-- Chosen -->
+<script src="{% static 'js/plugins/chosen/chosen.jquery.js' %}"></script>
+
+
+<!-- Dynamic Forms -->
+
+<script src="{% static 'js/ajax-models.js' %}"></script>
+
+<script>
+	$(document).ready(function () {
+		$('.chosen-select').chosen({ width: "100%" });
+		// now the many to many
+		$('.chosen-multi-select').chosen({
+			placeholder_text_multiple: 'Seleccione uno o varios elementos',
+			width: "100%",
+		});
+
+		// Date picker
+		$('.input-group.date').datepicker({
+			todayBtn: "linked",
+			keyboardNavigation: false,
+			forceParse: false,
+			calendarWeeks: true,
+			autoclose: true,
+			format: 'yyyy-mm-dd'
+		});
+
+		// Clock picker
+		$('.clockpicker').clockpicker();
+
+		// if chosen-select or chosen-multi-select options are added or removed, refresh
+		$(document).on('change', '.chosen-select, .chosen-multi-select', function () {
+			$(this).trigger('chosen:updated');
+		});
+	});
+</script>
+
+{% if formset %}
+<script>
+	let inlineForm = document.querySelectorAll(".inline-form")
+	let container = document.querySelector("#form-container")
+	let addButton = document.querySelector("#add-form")
+	let totalForms = document.querySelector("#id_{{ formset_model.related_name }}-TOTAL_FORMS")
+
+	let formNum = inlineForm.length
+	addButton.addEventListener('click', addForm)
+
+	function addForm(e){
+			e.preventDefault()
+			let newForm = inlineForm[0].cloneNode(true)
+			console.log(newForm)
+			let regex = RegExp("{{ formset_model.related_name }}-0", "g")
+			newForm.innerHTML = newForm.innerHTML.replace(regex, `{{ formset_model.related_name }}-${formNum}`)
+			container.appendChild(newForm)
+			formNum++
+			totalForms.value = formNum
+
+			$('.chosen-select').chosen({width: "100%"});
+			let inputGroups = document.querySelectorAll(".input-group")
+			inputGroups.forEach(inputGroup => {
+					let chosenContainers = inputGroup.querySelectorAll(".chosen-container")
+					if (chosenContainers.length > 1) {
+							chosenContainers[chosenContainers.length - 1].remove()
+					}
+			})
+	}
+
+	function removeForm(e){
+			e.preventDefault()
+			let form = e.target.closest(".inline-form")
+			form.remove()
+			formNum--
+			totalForms.value = formNum
+
+			updateForms()
+	}
+
+	function updateForms(){
+			let forms = document.querySelectorAll(".inline-form")
+			let formNum = 0
+			forms.forEach(form => {
+					let regex = RegExp("{{ formset_model.related_name }}-[0-9]+", "g")
+					inputs = form.querySelectorAll("input, select")
+					inputs.forEach(input => {
+							input.name = input.name.replace(regex, `{{ formset_model.related_name }}-${formNum}`)
+							input.id = input.id.replace(regex, `{{ formset_model.related_name }}-${formNum}`)
+					})
+					formNum++
+			})
+
+			$('.chosen-select').chosen({width: "100%"});
+			let inputGroups = document.querySelectorAll(".input-group")
+			inputGroups.forEach(inputGroup => {
+					let chosenContainers = inputGroup.querySelectorAll(".chosen-container")
+					if (chosenContainers.length > 1) {
+							chosenContainers[chosenContainers.length - 1].remove()
+					}
+			})
+	}
+</script>
+{% endif %}
+
+{% endblock %}

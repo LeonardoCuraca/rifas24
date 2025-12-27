@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+env/
+venv/
+ENV/
+.venv/
+.Python
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+local_settings.py
+instance/
+.scrapy
+
+# VSCode settings
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# MySQL/MariaDB
+*.db
+
+# Other
+coverage/
+*.cover
+htmlcov/
+*.orig
+# Sphinx documentation
+docs/_build/
+
+.env

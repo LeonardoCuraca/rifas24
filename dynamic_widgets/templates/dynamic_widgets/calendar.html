@@ -1,0 +1,205 @@
+{% extends 'panel/base.html' %}
+
+{% load static %}
+{% load dynamic_forms %}
+
+{% block head %}
+<link href="{% static 'css/plugins/footable/footable.core.css' %}" rel="stylesheet">
+
+<link href="{% static 'css/plugins/fullcalendar/fullcalendar.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/fullcalendar/fullcalendar.print.css' %}" rel='stylesheet' media='print'>
+
+<link href="{% static 'css/plugins/iCheck/custom.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/chosen/bootstrap-chosen.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/datapicker/datepicker3.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/clockpicker/clockpicker.css' %}" rel="stylesheet">
+<link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="wrapper wrapper-content">
+    <div class="row animated fadeInDown">
+        <div class="col-lg-9">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+					{% include view.extra_template %}
+        </div>
+    </div>
+</div>
+
+<div id="modal-form" class="modal fade" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-body">
+                <p>Agendar una cita</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form | dynamic_form:request | safe }}
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for object in object_list %}
+{% include view.modal_template %}
+{% endfor %}
+
+
+{{ form | dynamic_modals:request | safe }}
+
+{% endblock %}
+
+{% block script %}
+
+<!-- Mainly scripts -->
+<script src="{% static 'js/plugins/fullcalendar/moment.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+<script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+<!-- Smart Selects Libary -->
+<script src="{% static 'smart-selects/admin/js/chainedfk.js' %}"></script>
+<script src="{% static 'smart-selects/admin/js/bindfields.js' %}"></script>
+
+<!-- Date picker -->
+<script src="{% static 'js/plugins/datapicker/bootstrap-datepicker.js' %}"></script>
+
+<!-- Color picker -->
+<script src="{% static 'js/plugins/colorpicker/bootstrap-colorpicker.min.js' %}"></script>
+
+<!-- Clock picker -->
+<script src="{% static 'js/plugins/clockpicker/clockpicker.js' %}"></script>
+
+<!-- Chosen -->
+<script src="{% static 'js/plugins/chosen/chosen.jquery.js' %}"></script>
+
+<script src="{% static 'js/plugins/iCheck/icheck.min.js' %}"></script>
+
+<!-- Dynamic Forms -->
+<script src="{% static 'js/ajax-models.js' %}"></script>
+
+<!-- Full Calendar -->
+<script src="{% static 'js/plugins/fullcalendar/fullcalendar.min.js' %}"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.chosen-select').chosen({width: "100%"});
+        // now the many to many
+        $('.chosen-multi-select').chosen({
+            placeholder_text_multiple: 'Seleccione uno o varios elementos',
+            width: "100%",
+        });
+
+        // Date picker
+        $('.input-group.date').datepicker({
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true,
+            format: 'yyyy-mm-dd',
+        });
+
+        // Clock picker
+        $('.clockpicker').clockpicker();
+
+        // if modal_customer is shown, hide modal-form
+        $('#modal_customer').on('shown.bs.modal', function () {
+            $('#modal-form').modal('hide');
+        });
+
+        // if modal_customer is closed, show modal-form
+        $('#modal_customer').on('hidden.bs.modal', function () {
+            $('#modal-form').modal('show');
+        });
+
+        $(".modal").on("shown.bs.modal", function () {
+            if ($(".modal-backdrop").length > 1) {
+                $(".modal-backdrop").not(':last').remove();
+            }
+        })
+
+        var date = new Date();
+        var d = date.getDate();
+        var m = date.getMonth();
+        var y = date.getFullYear();
+
+        function fcd_to_text(date) {
+            var day = ("0" + date.date()).slice(-2);
+            var month = ("0" + (date.month() + 1)).slice(-2);
+            var year = date.year()
+            return year + '-' + month + '-' + day
+        }
+
+        data = JSON.parse('{{ data | safe }}')
+
+        $('#calendar').fullCalendar({
+            locale: 'es',
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            drop: function () {
+                // is the "remove after drop" checkbox checked?
+                if ($('#drop-remove').is(':checked')) {
+                    // if so, remove the element from the "Draggable Events" list
+                    $(this).remove();
+                }
+            },
+            events: data,
+            // on click
+            dayClick: function (date, jsEvent, view) {
+                var datext = fcd_to_text(date)
+                $('.input-group.date').datepicker('update', datext);
+
+                $('#modal-form').modal('show');
+            },
+            eventClick: function(event, element) {
+                var id = event.id;
+                console.log(id)
+                $('#modal-detail-' + id).modal('show');
+            },
+            monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+            monthNamesShort: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+            dayNames: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
+            dayNamesShort: ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
+            buttonText: {
+                today: 'Hoy',
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día'
+            }
+        });
+
+    });
+</script>
+
+<script>
+    // hide id_remind_after_message on document ready
+    $('#id_remind_after_message').parent().parent().parent().hide();
+
+    $('#id_remind_after').change(function() {
+        if ($(this).val() > 0) {
+            $('#id_remind_after_message').parent().parent().parent().show();
+            if ($('#id_remind_after_message').val() == '') {
+                // if no customer is selected, use {{Cliente}} in one line
+                var customer = $('#id_customer').val() ? $('#id_customer option:selected').text() : '<Cliente>';
+
+                var message = 'Estimado ' + customer + ',\n\nLe recordamos que debe realizar <Servicio>. Si deseas agendar una cita, contáctate con nuestro equipo o responde este correo.\n\nAtte. {{user.company}}';
+                $('#id_remind_after_message').val(message);
+            }
+        } else {
+            $('#id_remind_after_message').parent().parent().parent().hide();
+        }
+    });
+</script>
+{% endblock %}

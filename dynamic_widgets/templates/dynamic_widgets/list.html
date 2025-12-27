@@ -1,0 +1,48 @@
+{% extends 'panel/base.html' %}
+
+{% load static %}
+{% load dynamic_filters %}
+
+{% block head %}
+<title>{{ project_name }} - {{ model.verbose_name_plural|title }}</title>
+
+<link href="{% static 'css/plugins/footable/footable.core.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="wrapper wrapper-content animated fadeIn">
+    <div class="ibox-content m-b-sm border-bottom">
+        <div class="row">
+            <div class="col-sm-3">
+                <form method="get">
+                    {{ request|dynamic_search|safe }}
+                </form>
+            </div>
+            {{ view|dynamic_filters:request|safe }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="table-responsive">
+						{{ view|dynamic_table:request|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/plugins/footable/footable.all.min.js' %}"></script>
+
+<script>
+	$(document).ready(function() {
+		$('.footable').footable({paginate: false});
+	});
+</script>
+{% endblock %}
