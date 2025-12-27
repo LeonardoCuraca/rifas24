@@ -5,6 +5,7 @@ __pycache__/
 *.egg
 *.egg-info/
 dist/
+!theme/static/css/dist/styles.css
 build/
 env/
 venv/
