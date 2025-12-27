@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<main class="container mx-auto py-8 px-4">
+<main class="container mx-auto py-8">
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-primary">Detalle de la Rifa</h1>
         {% if raffle.winner %}
@@ -21,8 +21,8 @@
 
                 {% if not raffle.winner %}
                     <div class="mt-6 p-4 bg-gray-50 rounded-lg text-center border-2 border-dashed border-primary/20">
-                        <p class="text-lg font-semibold text-primary mb-2 uppercase">Tiempo restante</p>
-                        <div id="countdown" class="flex justify-center items-center space-x-4 text-primary text-4xl md:text-5xl font-extrabold">
+                        <p class="text-lg font-semibold text-primary mb-2">TIEMPO RESTANTE PARA PARTICIPAR</p>
+                        <div id="countdown" class="flex justify-center items-center space-x-4 text-primary text-5xl font-extrabold">
                             <div class="flex flex-col items-center">
                                 <span id="days">00</span>
                                 <span class="font-medium text-gray-600 uppercase text-xs">Días</span>
@@ -40,12 +40,12 @@
                             <span>:</span>
                             <div class="flex flex-col items-center">
                                 <span id="seconds">00</span>
-                                <span class="font-medium text-gray-600 uppercase text-xs">Segs</span>
+                                <span class="font-medium text-gray-600 uppercase text-xs">Segundos</span>
                             </div>
                         </div>
                     </div>
                 {% else %}
-                    <div class="mt-6 p-6 bg-gradient-to-r from-amber-50 to-yellow-100 border-2 border-amber-400 rounded-xl text-center shadow-inner">
+                    <div class="mt-6 p-6 bg-linear-to-r  from-amber-50 to-yellow-100 border-2 border-amber-400 rounded-xl text-center shadow-inner">
                         <p class="text-amber-800 font-bold text-xl mb-2">✨ ¡TENEMOS UN GANADOR! ✨</p>
                         <div class="flex flex-col items-center justify-center">
                             <div class="w-16 h-16 bg-amber-400 rounded-full flex items-center justify-center mb-2 shadow-md">
@@ -54,7 +54,7 @@
                             <h3 class="text-3xl font-black text-amber-900 uppercase tracking-tight">
                                 {{ raffle.winner.get_full_name|default:raffle.winner.username }}
                             </h3>
-                            <p class="text-amber-700 mt-1 font-medium italic">Felicidades por ganar "{{ raffle.name }}"</p>
+                            <p class="text-amber-700 mt-1 font-medium italic">Felicidades por ganar la rifa "{{ raffle.name }}"</p>
                         </div>
                     </div>
                 {% endif %}
@@ -63,16 +63,25 @@
                     <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    {% if raffle.winner %}Finalizó el:{% else %}Finaliza el:{% endif %}
-                    <span class="ml-1">{{ raffle.end_date|date:"d M, Y" }} a las 8:00 PM</span>
+                    
+                    {% if raffle.winner %}
+                        <span class="text-amber-700">Finalizó el:</span>
+                    {% else %}
+                        <span>Finaliza el:</span>
+                    {% endif %}
+                    
+                    <span class="ml-1">
+                        {{ raffle.end_date|date:"d M, Y" }} a las 8:00 PM (Lima/Perú)
+                    </span>
                 </p>
             </div>
 
             <div class="bg-white rounded-lg shadow-md p-6">
                 {% if not raffle.winner %}
-                    <h3 class="text-xl font-semibold text-primary mb-4">Adquirir Tickets</h3>
+                    <h3 class="text-xl font-semibold text-primary mb-4">Comprar Tickets</h3>
                     
-                    <form action="{% url 'payments:generate-order' %}" method="GET" class="space-y-4">
+                    <form id="buy-tickets-form" method="POST" class="space-y-4">
+                        {% csrf_token %}
                         <input type="hidden" name="raffle_id" value="{{ raffle.id }}">
 
                         <div>
@@ -82,19 +91,19 @@
                             <div class="flex items-center border border-gray-300 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
                                 <input type="number" id="tickets_quantity" name="tickets_quantity" 
                                        class="grow p-3 text-gray-800 focus:outline-none" 
-                                       value="1" min="1" required>
-                                <span class="bg-gray-100 text-gray-600 px-4 py-3 border-l border-gray-300 font-medium whitespace-nowrap">S/ 1.50 c/u</span>
+                                       value="1" min="1">
+                                <span class="bg-gray-100 text-gray-600 px-4 py-3 border-l border-gray-300 font-medium">S/ 1.50 c/u</span>
                             </div>
                         </div>
                         
                         {% if not user.is_authenticated %}
-                            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded relative text-sm">
-                                Debes <a href="{% url 'login' %}" class="underline font-semibold hover:text-primary">iniciar sesión</a> para comprar.
-                            </div>
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded relative mb-4 text-sm">
+                            Debes <a href="{% url 'login' %}" class="underline font-semibold hover:text-primary">iniciar sesión</a> o <a href="{% url 'website:register' %}" class="underline font-semibold hover:text-primary">crear una cuenta</a> para comprar tickets.
+                        </div>
                         {% else %}
-                            <button type="submit" class="w-full bg-primary text-white py-4 rounded-md font-bold hover:bg-opacity-90 transition-all transform active:scale-[0.98] shadow-lg cursor-pointer uppercase tracking-wider">
-                                Ir a Pagar
-                            </button>
+                        <button type="submit" class="w-full bg-primary text-white py-4 rounded-md font-bold hover:bg-opacity-90 transition-all transform active:scale-[0.98] shadow-lg cursor-pointer">
+                            COMPRAR AHORA
+                        </button>
                         {% endif %}
                     </form>
                 {% else %}
@@ -103,12 +112,15 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                         </div>
                         <h3 class="text-xl font-bold text-gray-400 uppercase tracking-widest">Ventas Cerradas</h3>
+                        <p class="text-gray-500 mt-2 text-sm">Ya no es posible adquirir más tickets para esta rifa.</p>
                     </div>
                 {% endif %}
 
                 <div class="mt-6 pt-6 border-t border-gray-100">
-                    <p class="text-gray-700 text-sm font-bold mb-2">Métodos Aceptados:</p>
-                    <div class="flex space-x-4 items-center opacity-60">
+                    <p class="text-gray-700 text-sm font-bold mb-2">Métodos de Pago Aceptados:</p>
+                    <div class="flex space-x-4 items-center {% if raffle.winner %}grayscale{% endif %} opacity-60">
+                        <img src="{% static 'img/visa.png' %}" alt="Visa" class="h-6" />
+                        <img src="{% static 'img/mastercard.png' %}" alt="Mastercard" class="h-6" />
                         <img src="{% static 'img/yape.png' %}" alt="Yape" class="h-6" />
                     </div>
                 </div>
@@ -126,7 +138,7 @@
                         {% for participant in participants %}
                             <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors px-2 rounded">
                                 <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3 text-xs font-bold text-gray-500 uppercase">
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3 text-xs font-bold text-gray-500">
                                         {{ participant.full_name|slice:":1" }}
                                     </div>
                                     <span class="text-gray-800 text-sm font-medium">{{ participant.full_name }}</span>
@@ -149,10 +161,9 @@
 <script>
     const endDateString = "{{ raffle.end_date|date:'Y-m-d' }}";
     const [year, month, day] = endDateString.split('-').map(Number);
-    // Ajustado a las 8:00 PM de Lima (UTC-5)
     const targetDate = new Date(Date.UTC(year, month - 1, day, 20 + 5, 0, 0));
 
-    const elements = {
+    const countdownElements = {
         days: document.getElementById('days'),
         hours: document.getElementById('hours'),
         minutes: document.getElementById('minutes'),
@@ -164,30 +175,76 @@
         const distance = targetDate.getTime() - now;
 
         if (distance < 0) {
-            clearInterval(interval);
+            clearInterval(countdownInterval);
+            // Si el tiempo expira, recargar para verificar si ya hay ganador en el servidor
             window.location.reload();
             return;
         }
 
-        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        elements.days.textContent = String(d).padStart(2, '0');
-        elements.hours.textContent = String(h).padStart(2, '0');
-        elements.minutes.textContent = String(m).padStart(2, '0');
-        elements.seconds.textContent = String(s).padStart(2, '0');
+        countdownElements.days.textContent = String(days).padStart(2, '0');
+        countdownElements.hours.textContent = String(hours).padStart(2, '0');
+        countdownElements.minutes.textContent = String(minutes).padStart(2, '0');
+        countdownElements.seconds.textContent = String(seconds).padStart(2, '0');
     }
 
-    const interval = setInterval(updateCountdown, 1000);
+    const countdownInterval = setInterval(updateCountdown, 1000);
     updateCountdown();
 </script>
 {% endif %}
+
+<script>
+    // Listener del Formulario (Solo si existe en el DOM)
+    const purchaseForm = document.getElementById('buy-tickets-form');
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = "PROCESANDO...";
+
+            try {
+                const formData = new FormData(e.target);
+                const response = await fetch('{% url "payments:generate-payment-link" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    window.location.href = data.init_point;
+                } else {
+                    
+                    if (data.should_reload) {
+                        alert(data.error);
+                        window.location.reload();
+                    } else {
+                        alert("Error: " + (data.error || "Ocurrió un problema"));
+                        btn.disabled = false;
+                        btn.textContent = "COMPRAR AHORA";
+                    }
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                btn.disabled = false;
+                btn.textContent = "COMPRAR AHORA";
+            }
+        });
+    }
+</script>
 
 <style>
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 </style>
 {% endblock %}

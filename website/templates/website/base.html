@@ -45,7 +45,7 @@
   
 <body class="flex flex-col min-h-screen bg-gray-100">
 
-    <header class="bg-white shadow-md p-4 relative">
+    <header class="bg-white shadow-md p-4 relative" x-data="{ mobileMenuOpen: false }">
         <nav class="container mx-auto flex justify-between items-center">
             <a href="/" class="flex items-center space-x-2">
                 <img src="{% static 'img/logo.png' %}" alt="Rifas 24 Logo" class="h-8">
@@ -80,9 +80,7 @@
     
                             <a href="{% url 'website:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-secondary">Mi Perfil</a>
                             <a href="{% url 'website:my_purchases' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-secondary">Mis Compras</a>
-                            
                             <hr class="my-1 border-gray-100">
-                            
                             <form method="post" action="{% url 'logout' %}" class="block w-full text-left">
                                 {% csrf_token %}
                                 <button type="submit" class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium text-left cursor-pointer">
@@ -100,13 +98,38 @@
                     </div>
                 {% endif %}
     
-                <button class="md:hidden text-primary">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-primary focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </nav>
+    
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             @click.away="mobileMenuOpen = false"
+             class="md:hidden bg-white border-t border-gray-100 absolute left-0 right-0 top-full shadow-lg z-40">
+            
+            <div class="flex flex-col p-4 space-y-4">
+                <a href="/" class="text-gray-700 font-medium hover:text-secondary">Todas las Rifas</a>
+                <a href="/" class="text-gray-700 font-medium hover:text-secondary">En Vivo</a>
+                <a href="/" class="text-gray-700 font-medium hover:text-secondary">Ganadores</a>
+    
+                {% if not user.is_authenticated %}
+                    <hr class="border-gray-100">
+                    <div class="flex flex-col space-y-3">
+                        <a href="{% url 'login' %}" class="text-center text-gray-600 font-medium py-2">Iniciar Sesión</a>
+                        <a href="{% url 'website:register' %}" class="text-center bg-primary text-white px-4 py-2 rounded-lg font-bold">
+                            Registrarse
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </header>
 
     <main class="grow container mx-auto p-4">

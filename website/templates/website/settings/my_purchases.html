@@ -3,11 +3,21 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    
+    <nav class="flex mb-6 text-sm items-center space-x-2 text-gray-500">
+        <a href="/" class="hover:text-primary transition-colors flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Inicio
+        </a>
+        <span class="text-gray-300">/</span>
+        <span class="text-gray-900 font-bold">Mis Compras</span>
+    </nav>
+
     <div class="flex flex-col md:flex-row gap-8">
         
         <aside class="w-full md:w-1/4 space-y-2">
             <h2 class="text-xl font-bold text-gray-800 mb-6 px-4">Configuración</h2>
-            <nav>
+            <nav class="space-y-1">
                 <a href="{% url 'website:profile' %}" 
                    class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-medium border-l-4 {% if request.resolver_match.url_name == 'profile' %} bg-blue-50 text-primary border-primary {% else %} text-gray-500 border-transparent hover:bg-gray-50 hover:text-gray-700 {% endif %}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -23,12 +33,10 @@
 
         <main class="w-full md:w-3/4">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                <div class="absolute top-0 right-0 w-48 h-48 bg-secondary opacity-[0.03] rounded-full -mr-24 -mt-24"></div>
-
-                <div class="p-8 relative">
+                <div class="p-6 md:p-8 relative">
                     <div class="mb-8">
-                        <h1 class="text-2xl font-bold text-gray-900">Mis Compras</h1>
-                        <p class="text-sm text-gray-500">Historial de tickets y estados de pago.</p>
+                        <h1 class="text-2xl font-bold text-gray-900">Historial de Compras</h1>
+                        <p class="text-sm text-gray-500">Consulta el estado de tus participaciones.</p>
                     </div>
 
                     {% if orders %}
@@ -36,34 +44,49 @@
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                                    <th class="pb-4 px-2">ORDEN</th>
+                                    <th class="pb-4 px-2">Rifa</th>
                                     <th class="pb-4 px-2 text-center">Tickets</th>
-                                    <th class="pb-4 px-2 text-center">Fecha</th>
-                                    <th class="pb-4 px-2 text-right">Estado</th>
+                                    <th class="pb-4 px-2 text-center">Estado</th>
+                                    <th class="pb-4 px-2 text-right">Acción</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 {% for order in orders %}
-                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                <tr class="hover:bg-gray-50/50 transition-colors group">
                                     <td class="py-5 px-2">
-                                        <p class="font-bold text-gray-800 text-sm">{{ order.raffle.title }}</p>
-                                        <p class="text-[10px] text-gray-400 uppercase">ID: #{{ order.id }}</p>
+                                        <p class="font-bold text-gray-800 text-sm">{{ order.raffle.name }}</p>
+                                        <p class="text-[10px] text-gray-400 uppercase">Orden #{{ order.id }} • {{ order.created_at|date:"d/m/Y" }}</p>
                                     </td>
                                     <td class="py-5 px-2 text-center">
-                                        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-blue-50 text-primary text-xs font-bold">
-                                            {{ order.tickets_quantity }} und.
+                                        <span class="inline-flex items-center justify-center px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-bold">
+                                            x{{ order.tickets_quantity }}
                                         </span>
                                     </td>
-                                    <td class="py-5 px-2 text-center text-xs text-gray-600">
-                                        {{ order.created_at|date:"d M, Y" }}
+                                    <td class="py-5 px-2 text-center">
+                                        {% if order.status == 'approved' %}
+                                            <span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Aprobado</span>
+                                        {% elif order.status == 'pending' and order.payment_proof %}
+                                            <span class="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-wider">En Revisión</span>
+                                        {% elif order.status == 'pending' %}
+                                            <span class="px-2.5 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Pendiente</span>
+                                        {% else %}
+                                            <span class="px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Rechazado</span>
+                                        {% endif %}
                                     </td>
                                     <td class="py-5 px-2 text-right">
-                                        {% if order.status == 'approved' %}
-                                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[11px] font-bold tracking-wide uppercase">Aprobado</span>
-                                        {% elif order.status == 'pending' %}
-                                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[11px] font-bold tracking-wide uppercase">Pendiente</span>
+                                        {% if order.status == 'pending' %}
+                                            <a href="{% url 'payments:order' order.id %}"
+                                               class="inline-flex items-center text-xs font-bold {% if order.payment_proof %} text-primary hover:underline {% else %} px-3 py-2 bg-secondary text-white rounded-lg shadow-sm hover:bg-opacity-90 {% endif %} transition-all">
+                                                {% if order.payment_proof %}
+                                                    Ver Detalle
+                                                {% else %}
+                                                    Pagar Ahora
+                                                {% endif %}
+                                            </a>
+                                        {% elif order.status == 'approved' %}
+                                            <svg class="w-5 h-5 text-green-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                         {% else %}
-                                            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[11px] font-bold tracking-wide uppercase">Rechazado</span>
+                                            <a href="{% url 'website:raffle_detail' order.raffle.id %}" class="text-red-600 text-[11px] font-bold hover:underline">Reintentar</a>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -73,13 +96,13 @@
                     </div>
                     {% else %}
                     <div class="text-center py-16">
-                        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
-                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800">No tienes participaciones aún</h3>
-                        <p class="text-gray-500 text-sm mb-6">Compra tus primeros tickets para verlos aquí.</p>
-                        <a href="/" class="inline-flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded-lg hover:bg-blue-800 transition-all shadow-md">
-                            IR A LAS RIFAS
+                        <h3 class="text-lg font-bold text-gray-800">No hay compras registradas</h3>
+                        <p class="text-sm text-gray-500 mb-6">Tus participaciones aparecerán aquí una vez que elijas una rifa.</p>
+                        <a href="/" class="inline-flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-blue-800 transition-all shadow-md">
+                            Explorar Rifas
                         </a>
                     </div>
                     {% endif %}

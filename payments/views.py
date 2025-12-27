@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -121,3 +121,62 @@ def failure(request):
 
 def pending(request):
     return TemplateResponse(request, 'payments/pending.html')
+
+
+@login_required
+def generate_order(request):
+    raffle_id = request.GET.get('raffle_id')
+    tickets_quantity = int(request.GET.get('tickets_quantity', 1))
+
+    raffle = get_object_or_404(Raffle, id=raffle_id)
+    
+    order = Order.objects.create(
+        user=request.user,
+        raffle=raffle,
+        tickets_quantity=tickets_quantity
+    )
+    return redirect('payments:order', order_id=order.id)
+
+@login_required
+def order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    raffle = order.raffle
+
+    context = {
+        'order': order
+    }
+    return TemplateResponse(request, 'payments/order.html', context)
+
+
+@login_required
+def upload_proof(request, order_id):
+    # 1. Buscamos la orden y verificamos que pertenezca al usuario actual
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # 2. Validamos si el archivo viene en la petición
+    if 'payment_proof' not in request.FILES:
+        return JsonResponse({'error': 'No se seleccionó ningún archivo.'}, status=400)
+    
+    proof_file = request.FILES['payment_proof']
+    
+    # 3. (Opcional) Validar extensión o tamaño
+    if not proof_file.name.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+        return JsonResponse({'error': 'Formato de imagen no permitido (Usa JPG, PNG o WebP).'}, status=400)
+    
+    if proof_file.size > 5 * 1024 * 1024:  # Límite de 5MB
+        return JsonResponse({'error': 'La imagen es demasiado pesada (Máximo 5MB).'}, status=400)
+
+    try:
+        # 4. Guardamos el archivo y actualizamos el estado si es necesario
+        order.payment_proof = proof_file
+            
+        order.save()
+
+        return JsonResponse({
+            'message': 'Comprobante subido con éxito.',
+            'redirect_url': '/website/my-purchases/' # Opcional: pasar la URL desde el backend
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': f'Error al guardar: {str(e)}'}, status=500)
+

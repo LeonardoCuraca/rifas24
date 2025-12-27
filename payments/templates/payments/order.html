@@ -1,0 +1,124 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="container mx-auto py-8 px-4">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-primary uppercase tracking-tight">Finalizar Compra</h1>
+            <p class="text-gray-600">Sigue los pasos a continuación para completar tu participación.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        Resumen de Orden
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Rifa:</span>
+                            <span class="font-semibold text-gray-900">{{ order.raffle.name }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Cantidad:</span>
+                            <span class="font-semibold text-gray-900">{{ order.tickets_quantity }} tickets</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Precio unitario:</span>
+                            <span>S/ 1.50</span>
+                        </div>
+                        <hr class="border-gray-50">
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-xl font-bold text-gray-800">Total a pagar:</span>
+                            <span class="text-3xl font-black text-secondary">S/ {{ order.total_price|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                    <p class="text-sm text-blue-700">
+                        Tu orden ha sido registrada. Puedes finalizar el pago en cualquier momento y volver en tus <a href="{% url 'website:my_purchases' %}" class="text-secondary font-bold">compras</a>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 flex flex-col items-center">
+                <img src="{% static 'img/yape.png' %}" alt="Yape" class="h-10 mb-4">
+                
+                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 mb-6 w-full text-center">
+                    <img src="{% static 'img/qr-yape.jpeg' %}" alt="QR Yape" class="w-40 h-40 mx-auto object-contain mb-4">
+                    <div class="text-sm">
+                        <p class="font-mono font-bold text-primary text-lg">943 050 013</p>
+                        <p class="text-gray-600">Leonardo F. Curaca S.</p>
+                    </div>
+                </div>
+
+                <form id="upload-proof-form" class="w-full space-y-4">
+                    {% csrf_token %}
+                    <div class="relative">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Sube tu comprobante:</label>
+                        <input type="file" name="payment_proof" id="payment_proof" accept="image/*" required
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-90 cursor-pointer border border-gray-200 rounded-xl p-2">
+                    </div>
+
+                    <button type="submit" id="btn-upload" 
+                            class="w-full bg-primary text-white py-3 rounded-xl font-bold transition-all shadow-md hover:scale-[1.02] active:scale-95">
+                        CONFIRMAR SUBIDA
+                    </button>
+                </form>
+
+                <div class="relative w-full my-6">
+                    <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-gray-200"></span></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-gray-400">O también</span></div>
+                </div>
+
+                <a href="https://wa.me/51943050013?text=Hola!%20Acabo%20de%20pagar%20S/%20{{ order.total_price|floatformat:2 }}%20por%20la%20orden%20{{ order.id }}." 
+                   target="_blank"
+                   class="w-full border-2 border-[#25D366] text-[#25D366] py-3 rounded-xl font-bold flex items-center justify-center transition-all hover:bg-[#25D366] hover:text-white">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.417-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.305 1.652zm6.599-3.835c1.554.92 3.12 1.403 4.769 1.403 5.4 0 9.792-4.393 9.795-9.794.002-2.618-1.018-5.079-2.873-6.934s-4.318-2.875-6.937-2.875c-5.4 0-9.792 4.393-9.795 9.794-.001 1.761.47 3.411 1.363 4.887l-.903 3.3 3.381-.886zm10.741-7.145c-.29-.145-1.714-.848-1.98-.944-.266-.096-.459-.145-.653.145-.193.291-.749.944-.919 1.138-.17.193-.339.217-.629.072-.29-.145-1.223-.45-2.33-1.439-.861-.767-1.442-1.715-1.611-2.005-.17-.29-.018-.447.127-.591.13-.13.29-.339.435-.508.145-.17.193-.29.29-.484.096-.193.048-.363-.024-.508-.072-.145-.653-1.573-.895-2.153-.235-.568-.475-.491-.653-.5h-.557c-.193 0-.508.072-.773.363-.266.291-1.015.993-1.015 2.422 0 1.429 1.039 2.81 1.185 3.003.145.193 2.044 3.122 4.951 4.379.691.299 1.231.478 1.651.611.693.22 1.325.189 1.823.115.556-.083 1.714-.701 1.956-1.38.242-.679.242-1.259.17-1.38-.072-.121-.266-.193-.556-.339z"/></svg>
+                    AVISAR POR WHATSAPP
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('upload-proof-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-upload');
+        const formData = new FormData(e.target);
+        
+        btn.disabled = true;
+        btn.textContent = "SUBIENDO...";
+
+        try {
+            // Reemplaza esta URL por la que maneje la subida en tu views.py
+            const response = await fetch('{% url "payments:upload-proof" order.id %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            });
+
+            if (response.ok) {
+                alert("¡Comprobante subido con éxito! Validaremos tu pago pronto.");
+                window.location.href = "{% url 'website:my_purchases' %}";
+            } else {
+                const data = await response.json();
+                alert("Error: " + (data.error || "No se pudo subir la imagen"));
+                btn.disabled = false;
+                btn.textContent = "CONFIRMAR SUBIDA";
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error de conexión");
+            btn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}

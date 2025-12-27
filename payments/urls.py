@@ -10,4 +10,8 @@ urlpatterns = [
     path('success/', success, name='success'),
     path('failure/', failure, name='failure'),
     path('pending/', pending, name='pending'),
+
+    path('generate-order/', generate_order, name='generate-order'),
+    path('order/<uuid:order_id>/', order, name='order'),
+    path('upload-proof/<uuid:order_id>/', upload_proof, name='upload-proof'),
 ]
