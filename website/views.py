@@ -56,7 +56,10 @@ def raffle_detail(request, raffle_id):
         {
             'id': participant['user__id'],
             'username': participant['user__username'],
-            'full_name': f"{participant['user__first_name']} {participant['user__last_name']}".strip() or participant['user__username'],
+            'full_name': (
+                f"{participant['user__first_name'][:3]}{'*' * len(participant['user__first_name'][3:])} "
+                f"{participant['user__last_name'][:3]}{'*' * len(participant['user__last_name'][3:])}"
+            ).strip() or participant['user__username'],
             'tickets_bought': participant['total_tickets']
         }
         for participant in participants
