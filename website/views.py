@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count, Q
@@ -75,14 +76,23 @@ def raffle_detail(request, raffle_id):
 class RegisterView(SuccessMessageMixin, CreateView):
     template_name = 'registration/register.html'
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('login')
     success_message = "¡Tu cuenta ha sido creada! Ya puedes participar en las rifas."
 
     def form_valid(self, form):
-        # Generamos un username automático basado en el email si no quieres pedirlo
         user = form.save(commit=False)
-        user.username = user.email 
-        return super().form_valid(form)
+        user.username = user.email
+
+        response = super().form_valid(form)
+        
+        login(self.request, self.object)
+
+        return response
+
+    def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return reverse_lazy('website:index')
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
