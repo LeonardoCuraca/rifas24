@@ -3,7 +3,6 @@ import mercadopago
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -29,30 +28,9 @@ def webhook(request):
         status = payment['status']
 
         order = Order.objects.get(id=external_reference)
-        order.status = status
-        order.save()
         
-        tickets = [
-            Ticket(
-                raffle=order.raffle,
-                user=order.user,
-                order=order
-            )
-            for _ in range(order.tickets_quantity)
-        ]
-
-        Ticket.objects.bulk_create(tickets)
-
-        subject = f'Compra de tickets para la rifa: {order.raffle.name}'
-        message = (
-            f'Hola {order.user.first_name},\n\n'
-            f'Gracias por tu compra de {order.tickets_quantity} ticket(s) para la rifa "{order.raffle.name}".\n\n'
-            f'Mucha suerte y gracias por participar.\n\n'
-            'Atentamente,\n'
-            'El equipo de Rifas 24'
-        )
-
-        send_mail(subject, message, settings.EMAIL_HOST_USER, [order.user.email])
+        if status == 'approved':
+            order.approve()
 
     return JsonResponse({'status': 'ok'})
 
