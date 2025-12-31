@@ -52,7 +52,7 @@
                                 <span class="text-3xl">🏆</span>
                             </div>
                             <h3 class="text-3xl font-black text-amber-900 uppercase tracking-tight">
-                                {{ raffle.winner.get_full_name|default:raffle.winner.username }}
+                                {{ raffle.winner.masked_full_name|default:raffle.winner.username }}
                             </h3>
                             <p class="text-amber-700 mt-1 font-medium italic">Felicidades por ganar "{{ raffle.name }}"</p>
                         </div>

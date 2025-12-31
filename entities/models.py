@@ -21,6 +21,13 @@ class User(AbstractUser, DynamicModelBase):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.phone})"
 
+    @property
+    def masked_full_name(self):
+        return (
+            f"{self.first_name[:3]}{'*' * len(self.first_name[3:])} "
+            f"{self.last_name[:3]}{'*' * len(self.last_name[3:])}"
+        ).strip()
+        
 class Raffle(DynamicModelBase):
     name = models.CharField(max_length=255)
     description = models.TextField()

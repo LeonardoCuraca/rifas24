@@ -97,7 +97,7 @@
                                     </div>
                                 </div>
                                 
-                                <p class="text-2xl font-black text-amber-950 mb-6">{{ raffle.winner.get_full_name|default:raffle.winner.username }}</p>
+                                <p class="text-2xl font-black text-amber-950 mb-6">{{ raffle.winner.masked_full_name|default:raffle.winner.username }}</p>
                                 
                                 <div class="mt-auto flex justify-between items-center pt-4 border-t border-amber-200">
                                     <span class="text-sm font-medium text-amber-800">{{ raffle.end_date|date:"d M, Y" }}</span>
